@@ -1,9 +1,9 @@
 import React, { useContext } from "react";
-import { AmazonContext } from "../context/AmazonContext";
+import { CgMenuGridO } from "react-icons/cg";
 import logo from "../assets/amazon_logo_full.png";
 import Image from "next/image";
-import { CgMenuGridO } from "react-icons/cg";
 import { IoMdSearch } from "react-icons/io";
+import { AmazonContext } from "../context/AmazonContext";
 import { FaCoins } from "react-icons/fa";
 import {
   ModalProvider,
@@ -12,8 +12,7 @@ import {
   ModalTransition,
 } from "react-simple-hook-modal";
 import "react-simple-hook-modal/dist/styles.css";
-
-const balance = "99";
+import BuyModal from "./BuyModal";
 
 const Header = () => {
   const { openModal, isModalOpen, closeModal } = useModal();
@@ -26,6 +25,7 @@ const Header = () => {
     menuItem: `flex items-center text-md font-bold cursor-pointer`,
     coins: `ml-[10px]`,
   };
+  let { balance } = useContext(AmazonContext);
 
   return (
     <div className={styles.container}>
@@ -57,17 +57,17 @@ const Header = () => {
             {balance}
             <FaCoins className={styles.coins} />
             <Modal isOpen={isModalOpen} transition={ModalTransition.SCALE}>
-              {/* <BuyModal close={closeModal} buyTokens={buyTokens} */}
+              <BuyModal close={closeModal} />
             </Modal>
           </div>
         ) : (
           <div
             className={(styles.balance, styles.menuItem)}
-            // onClick={openModal}
+            onClick={openModal}
           >
             0 SWF <FaCoins className={styles.coins} />
             <Modal isOpen={isModalOpen} transition={ModalTransition.SCALE}>
-              {/* <BuyModal close={closeModal} buyTokens={buyTokens} */}
+              <BuyModal close={closeModal} />
             </Modal>
           </div>
         )}

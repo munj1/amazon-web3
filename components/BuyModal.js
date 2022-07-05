@@ -30,7 +30,7 @@ const BuyModal = ({ close }) => {
     etherscanLink,
     setEtherscanLink,
     buyTokens,
-  } = useContext(AmaozonContext);
+  } = useContext(AmazonContext);
 
   useEffect(() => {
     calculatePrice();
@@ -41,6 +41,7 @@ const BuyModal = ({ close }) => {
     price = price.toFixed(4);
     setAmountDue(price);
   };
+
   return (
     <div className={styles.container}>
       {isLoading ? (
@@ -63,11 +64,9 @@ const BuyModal = ({ close }) => {
               className="cursor-pointer"
             />
           </div>
-          <div className={styles.title}>
-            Buy More SnowWhiteFactory Coins Here!
-          </div>
+          <div className={styles.title}>Buy More Amazon Coins Here!</div>
           <div className={styles.content}>
-            Select how many tokens would you like to buy
+            Select how many tokens you would like to buy.
           </div>
           <div className={styles.input}>
             <input
@@ -79,7 +78,7 @@ const BuyModal = ({ close }) => {
             />
           </div>
           <div className={styles.price}>
-            Total Due: {""}
+            Total Due:{" "}
             {tokenAmount && tokenAmount > 0 ? amountDue + "ETH" : "0 ETH"}
           </div>
           <button
@@ -95,12 +94,11 @@ const BuyModal = ({ close }) => {
           {etherscanLink && (
             <>
               <div className={styles.success}>
-                Transaction Successful! Check out your receipt for your
-                transaction below
+                Transaction Sucessful! Check out your receipt for your
+                transaction below!
               </div>
               <Link href={`${etherscanLink}`} className={styles.etherscan}>
                 <a className={styles.etherscan} target="_blank">
-                  {" "}
                   Transaction Receipt
                 </a>
               </Link>

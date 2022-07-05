@@ -5,8 +5,8 @@ import Card from "./Card";
 const Cards = () => {
   const { assets } = useContext(AmazonContext);
 
-  console.log("logging assets...");
-  console.log(assets);
+  // console.log("logging assets...");
+  // console.log(assets);
 
   const styles = {
     container: `h-full w-full flex flex-col ml-[20px] -mt-[20px]`,

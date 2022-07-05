@@ -1,20 +1,23 @@
 import { createContext, useState, useEffect } from "react";
 import { MoralisProvider, useMoralis, useMoralisQuery } from "react-moralis";
-import { SWF, SWFABI, SWFAddress } from "../lib/constants";
+import { SWFABI, SWFAddress } from "../lib/constants";
 import { ethers } from "ethers";
 
 export const AmazonContext = createContext();
 
 export const AmazonProvider = ({ children }) => {
+  const [currentAccount, setCurrentAccount] = useState("");
+  const [formattedAccount, setFormattedAccount] = useState("");
+  const [balance, setBalance] = useState("");
+  const [tokenAmount, setTokenAmount] = useState("");
+  const [amountDue, setAmountDue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [etherscanLink, setEtherscanLink] = useState("");
   const [nickname, setNickname] = useState("");
   const [username, setUsername] = useState("");
   const [assets, setAssets] = useState([]);
-  const [currentAccount, setCurrentAccount] = useState("");
-  const [tokenAmount, setTokenAmount] = useState("");
-  const [amountDue, setAmountDue] = useState("");
-  const [etherscanLink, setEtherscanLink] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [balance, setBalance] = useState("");
+  const [recentTransactions, setRecentTransactions] = useState([]);
+  const [ownedItems, setOwnedItems] = useState([]);
 
   const {
     authenticate,
@@ -24,6 +27,12 @@ export const AmazonProvider = ({ children }) => {
     user,
     isWeb3Enabled,
   } = useMoralis();
+
+  const {
+    data: userData,
+    error: userDataError,
+    isLoading: userDataIsLoading,
+  } = useMoralisQuery("_User");
 
   const {
     data: assetsData,
@@ -60,6 +69,43 @@ export const AmazonProvider = ({ children }) => {
     }
   };
 
+  const buyAsset = async (price, asset) => {
+    try {
+      if (!isAuthenticated) return;
+      console.log("price: ", price);
+      console.log("asset: ", asset.name);
+      console.log(userData);
+
+      const options = {
+        type: "erc20",
+        amount: price,
+        receiver: SWFAddress,
+        contractAddress: SWFAddress,
+      };
+
+      let transaction = await Moralis.transfer(options);
+      const receipt = await transaction.wait();
+
+      if (receipt) {
+        //You can do this but it's not necessary with Moralis hooks!
+        // const query = new Moralis.Query('_User')
+        // const results = await query.find()
+
+        const res = userData[0].add("ownedAsset", {
+          ...asset,
+          purchaseDate: Date.now(),
+          etherscanLink: `https://rinkeby.etherscan.io/tx/${receipt.transactionHash}`,
+        });
+
+        await res.save().then(() => {
+          alert("You've successfully purchased this asset!");
+        });
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
   const getBalance = async () => {
     try {
       if (!isAuthenticated || !currentAccount) return;
@@ -74,21 +120,29 @@ export const AmazonProvider = ({ children }) => {
 
       if (isWeb3Enabled) {
         const response = await Moralis.executeFunction(options);
+        console.log(response.toString());
         setBalance(response.toString());
       }
-    } catch (e) {
-      console.log(e);
+    } catch (error) {
+      console.log(error);
     }
+  };
+
+  const connectWallet = async () => {
+    await enableWeb3();
+    await authenticate();
   };
 
   const buyTokens = async () => {
     if (!isAuthenticated) {
-      await authenticate();
+      await connectWallet();
     }
 
     const amount = ethers.BigNumber.from(tokenAmount);
     const price = ethers.BigNumber.from("100000000000000");
     const calcPrice = amount.mul(price);
+
+    console.log(SWFAddress);
 
     let options = {
       contractAddress: SWFAddress,
@@ -99,9 +153,8 @@ export const AmazonProvider = ({ children }) => {
         amount,
       },
     };
-
     const transaction = await Moralis.executeFunction(options);
-    const receipt = await transaction.wait(2);
+    const receipt = await transaction.wait();
     setIsLoading(false);
     console.log(receipt);
     setEtherscanLink(
@@ -147,6 +200,7 @@ export const AmazonProvider = ({ children }) => {
         setEtherscanLink,
         currentAccount,
         buyTokens,
+        buyAsset,
       }}
     >
       {children}

@@ -12,26 +12,29 @@ const Card = ({ item }) => {
     coins: `ml-[10px]`,
   };
 
+  const { buyAsset } = useContext(AmazonContext);
+
   return (
-    <>
-      <div className={styles.cardContainer}>
-        <div className={styles.card}>
-          <Image
-            src={item.src}
-            width={190}
-            height={250}
-            className="object-cover object-center"
-            alt="product"
-          />
-        </div>
-        <div>
-          <div className={styles.cardTitle}>{item.name}</div>
-          <div className={styles.price}>
-            {item.price} SWF <FaCoins className={styles.coins} />
-          </div>
+    <div
+      className={styles.cardContainer}
+      onClick={() => buyAsset(item.price, item)}
+    >
+      <div className={styles.card}>
+        <Image
+          src={item.src}
+          width={190}
+          height={250}
+          className="object-cover object-center"
+          alt="product"
+        />
+      </div>
+      <div>
+        <div className={styles.cardTitle}>{item.name}</div>
+        <div className={styles.price}>
+          {item.price} SWF <FaCoins className={styles.coins} />
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
