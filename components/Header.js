@@ -44,7 +44,7 @@ const Header = () => {
           placeholder="Search Your Assets..."
           className={styles.searchInput}
         ></input>
-        <IoMdSearch fontsize={20} />
+        <IoMdSearch fontSize={20} />
       </div>
       <div className={styles.menu}>
         <div className={styles.menuItem}>New Release</div>
@@ -71,7 +71,7 @@ const Header = () => {
             </Modal>
           </div>
         )}
-        <CgMenuGridO fontsize={30} className={styles.menuItem} />
+        <CgMenuGridO fontSize={30} className={styles.menuItem} />
       </div>
     </div>
   );

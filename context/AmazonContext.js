@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect } from "react";
-import { useMoralis, useMoralisQuery } from "react-moralis";
-// import { amazonAbi, amazonCoinAddress } from "../lib/constants";
+import { MoralisProvider, useMoralis, useMoralisQuery } from "react-moralis";
+import { SWF, SWFABI, SWFAddress } from "../lib/constants";
 import { ethers } from "ethers";
 
 export const AmazonContext = createContext();
@@ -8,8 +8,13 @@ export const AmazonContext = createContext();
 export const AmazonProvider = ({ children }) => {
   const [nickname, setNickname] = useState("");
   const [username, setUsername] = useState("");
-
   const [assets, setAssets] = useState([]);
+  const [currentAccount, setCurrentAccount] = useState("");
+  const [tokenAmount, setTokenAmount] = useState("");
+  const [amountDue, setAmountDue] = useState("");
+  const [etherscanLink, setEtherscanLink] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [balance, setBalance] = useState("");
 
   const {
     authenticate,
@@ -29,8 +34,11 @@ export const AmazonProvider = ({ children }) => {
   useEffect(() => {
     (async () => {
       if (isAuthenticated) {
+        await getBalance();
         const currentUsername = await user?.get("nickname");
         setUsername(currentUsername);
+        const account = await user?.get("ethAddress");
+        setCurrentAccount(account);
       }
     })();
   }, [username, isAuthenticated, user, isWeb3Enabled]);
@@ -50,6 +58,55 @@ export const AmazonProvider = ({ children }) => {
     } else {
       console.log("No user");
     }
+  };
+
+  const getBalance = async () => {
+    try {
+      if (!isAuthenticated || !currentAccount) return;
+      const options = {
+        contractAddress: SWFAddress,
+        functionName: "balanceOf",
+        abi: SWFABI,
+        params: {
+          account: currentAccount,
+        },
+      };
+
+      if (isWeb3Enabled) {
+        const response = await Moralis.executeFunction(options);
+        setBalance(response.toString());
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const buyTokens = async () => {
+    if (!isAuthenticated) {
+      await authenticate();
+    }
+
+    const amount = ethers.BigNumber.from(tokenAmount);
+    const price = ethers.BigNumber.from("100000000000000");
+    const calcPrice = amount.mul(price);
+
+    let options = {
+      contractAddress: SWFAddress,
+      functionName: "mint",
+      abi: SWFABI,
+      msgValue: calcPrice,
+      params: {
+        amount,
+      },
+    };
+
+    const transaction = await Moralis.executeFunction(options);
+    const receipt = await transaction.wait(2);
+    setIsLoading(false);
+    console.log(receipt);
+    setEtherscanLink(
+      `https://rinkeby.etherscan.io/tx/${receipt.transactionHash}`
+    );
   };
 
   const getAssets = async () => {
@@ -79,6 +136,17 @@ export const AmazonProvider = ({ children }) => {
         username,
         handleSetUsername,
         assets,
+        balance,
+        setTokenAmount,
+        tokenAmount,
+        amountDue,
+        setAmountDue,
+        isLoading,
+        setIsLoading,
+        etherscanLink,
+        setEtherscanLink,
+        currentAccount,
+        buyTokens,
       }}
     >
       {children}
