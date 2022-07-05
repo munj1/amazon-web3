@@ -9,9 +9,18 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@web3auth/web3auth": "^1.1.0",
+    "magic-sdk": "^8.1.1",
+    "moment": "^2.29.3",
+    "moralis": "^1.8.1",
     "next": "12.2.0",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "react-icons": "^4.4.0",
+    "react-moralis": "^1.4.0",
+    "react-simple-hook-modal": "^1.1.0",
+    "react-spinners": "^0.13.3",
+    "web3uikit": "^0.1.163"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.7",
