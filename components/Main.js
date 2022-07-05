@@ -1,5 +1,7 @@
 import React, { useContext } from "react";
 import { AmazonContext } from "../context/AmazonContext";
+import Cards from "./Cards";
+import Header from "./Header";
 
 const Main = () => {
   const styles = {
@@ -11,9 +13,9 @@ const Main = () => {
 
   return (
     <div className={styles.container}>
-      {/* <Header/> */}
+      <Header />
       {/* <Featured/> */}
-      {/* <Cards/> */}
+      <Cards />
     </div>
   );
 };

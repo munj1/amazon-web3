@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { ConnectButton } from "web3uikit";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,13 +15,8 @@ import { AmazonContext } from "../context/AmazonContext";
 // const isAuthenticated = false;
 
 const Sidebar = () => {
-  const {
-    isAuthenticated,
-    nickname,
-    setNickname,
-    username,
-    handleSetUsername,
-  } = useContext(AmazonContext);
+  let { isAuthenticated, nickname, setNickname, username, handleSetUsername } =
+    useContext(AmazonContext);
 
   const styles = {
     container: `h-full w-[300px] flex flex-col bg-[#fff] static`,
@@ -61,7 +56,9 @@ const Sidebar = () => {
                     placeholder="Username..."
                     className={styles.usernameInput}
                     value={nickname}
-                    onChange={(e) => setNickname(e.target.value)}
+                    onChange={(e) => {
+                      setNickname(e.target.value);
+                    }}
                   />
                 </div>
                 <button

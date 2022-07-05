@@ -9,6 +9,8 @@ export const AmazonProvider = ({ children }) => {
   const [nickname, setNickname] = useState("");
   const [username, setUsername] = useState("");
 
+  const [assets, setAssets] = useState([]);
+
   const {
     authenticate,
     isAuthenticated,
@@ -18,6 +20,12 @@ export const AmazonProvider = ({ children }) => {
     isWeb3Enabled,
   } = useMoralis();
 
+  const {
+    data: assetsData,
+    error: assetsDataError,
+    isLoading: userDataisLoading,
+  } = useMoralisQuery("assets"); //parameter:classname
+
   useEffect(() => {
     (async () => {
       if (isAuthenticated) {
@@ -25,7 +33,7 @@ export const AmazonProvider = ({ children }) => {
         setUsername(currentUsername);
       }
     })();
-  }, [username, isAuthenticated, user]);
+  }, [username, isAuthenticated, user, isWeb3Enabled]);
 
   const handleSetUsername = () => {
     if (user) {
@@ -33,6 +41,9 @@ export const AmazonProvider = ({ children }) => {
         user.set("nickname", nickname);
         user.save();
         setNickname("");
+        setTimeout(() => {
+          location.reload();
+        }, 2000);
       } else {
         console.log("Can't set empty nickname");
       }
@@ -40,6 +51,24 @@ export const AmazonProvider = ({ children }) => {
       console.log("No user");
     }
   };
+
+  const getAssets = async () => {
+    try {
+      console.log("Running");
+      setAssets(assetsData);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      await enableWeb3();
+      if (isWeb3Enabled) {
+        await getAssets();
+      }
+    })();
+  }, [assetsData, userDataisLoading]);
 
   return (
     <AmazonContext.Provider
@@ -49,6 +78,7 @@ export const AmazonProvider = ({ children }) => {
         setNickname,
         username,
         handleSetUsername,
+        assets,
       }}
     >
       {children}
