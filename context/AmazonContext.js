@@ -40,18 +40,6 @@ export const AmazonProvider = ({ children }) => {
     isLoading: userDataisLoading,
   } = useMoralisQuery("assets"); //parameter:classname
 
-  useEffect(() => {
-    (async () => {
-      if (isAuthenticated) {
-        await getBalance();
-        const currentUsername = await user?.get("nickname");
-        setUsername(currentUsername);
-        const account = await user?.get("ethAddress");
-        setCurrentAccount(account);
-      }
-    })();
-  }, [username, isAuthenticated, user, isWeb3Enabled]);
-
   const handleSetUsername = () => {
     if (user) {
       if (nickname) {
@@ -162,6 +150,16 @@ export const AmazonProvider = ({ children }) => {
     );
   };
 
+  const listenToUpdates = async () => {
+    let query = new Moralis.Query("EthTransactions");
+    let subscription = await query.subscribe();
+    subscription.on("update", async (object) => {
+      console.log("New Transactions");
+      console.log(object);
+      setRecentTransactions([object]);
+    });
+  };
+
   const getAssets = async () => {
     try {
       console.log("Running");
@@ -171,10 +169,47 @@ export const AmazonProvider = ({ children }) => {
     }
   };
 
+  const getOwnedAssets = async () => {
+    try {
+      // let query = new Moralis.Query('_User')
+      // let results = await query.find()
+
+      if (userData[0]) {
+        setOwnedItems((prevItems) => [
+          ...prevItems,
+          userData[0].attributes.ownedAsset,
+        ]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      if (isAuthenticated) {
+        await getBalance();
+        await listenToUpdates();
+        const currentUsername = await user?.get("nickname");
+        setUsername(currentUsername);
+        const account = await user?.get("ethAddress");
+        setCurrentAccount(account);
+      }
+    })();
+  }, [
+    username,
+    isAuthenticated,
+    user,
+    isWeb3Enabled,
+    getBalance,
+    listenToUpdates,
+  ]);
+
   useEffect(() => {
     (async () => {
       await enableWeb3();
       if (isWeb3Enabled) {
+        await getOwnedAssets();
         await getAssets();
       }
     })();
@@ -201,6 +236,8 @@ export const AmazonProvider = ({ children }) => {
         currentAccount,
         buyTokens,
         buyAsset,
+        recentTransactions,
+        ownedItems,
       }}
     >
       {children}
